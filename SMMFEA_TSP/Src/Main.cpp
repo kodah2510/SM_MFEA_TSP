@@ -16,6 +16,13 @@
 
 #include "Individual.h"
 
+
+using GeneType = std::vector<int>;
+using DistMatType = std::vector<float>;
+using PosType = GeneType::iterator;
+
+using PopType = std::vector<std::unique_ptr<Individual>>;
+
 std::random_device rd;
 std::mt19937 gen(rd());
 
@@ -39,26 +46,24 @@ void split_token(std::string& line, std::vector<float>& values_pack)
 	);
 }
 
-
-void init_population(std::vector<int>& pert_arr, Individual& idv, std::mt19937& gen )
+using IdvUPtr = std::unique_ptr<Individual>;
+void init_population(std::vector<int>& pert_arr, std::unique_ptr<Individual>& idv, std::mt19937& gen )
 {
 	
 	std::shuffle(pert_arr.begin(), pert_arr.end(), gen);
 	for (auto& val : pert_arr)
 	{
-		idv.gene.emplace_back(val);
+		idv->gene.emplace_back(val);
 	}
 	std::cout << "initialized idv\n";
-	for (auto& val : idv.gene)
+	/*for (auto& val : idv->gene)
 	{
 		std::cout << val << " ";
 	}
-	std::cout << "\n";
+	std::cout << "\n";*/
 }
 
-using GeneType = std::vector<int>;
-using DistMatType = std::vector<float>;
-using PosType = GeneType::iterator;
+
 auto find_pos(GeneType& gene, int a, int b)
 {
 	auto pos_a = std::find(gene.begin(), gene.end(), a);
@@ -137,39 +142,49 @@ struct TaskMOO
 		return ret;
 	}
 };
-Individual& pick_rand_parent(std::vector<Individual>& pop, std::mt19937& gen)
-{
-	std::uniform_int_distribution<> dis(0, pop.size());
-	auto r = dis(gen);
-	return pop[r];
-}
+
 int get_rand_int(const int& begin, const int& end)
 {
 	std::uniform_int_distribution<> dis(begin, end);
 	return dis(rd);
 }
-void proceed_crossover(GeneType& p1_gene, GeneType& p2_gene, int first_side, int second_side, 
-	Individual& op1, Individual& op2)
+
+void proceed_crossover(GeneType p1_gene, GeneType p2_gene, // made a copy
+	int first_side, int second_side, 
+	Individual* &op1, Individual* &op2)
 {
 	size_t gene_sz = p1_gene.size();
 	//choose random substring
 	
+	GeneType p1_sub_gene;
+	p1_sub_gene.reserve(gene_sz);
+	for (auto i = first_side; i <= second_side; i++)
+	{
+		p1_sub_gene.emplace_back(p1_gene.at(i));
+	}
+	
+	p1_sub_gene.shrink_to_fit();
 
-	GeneType sub_gene;
-	sub_gene.reserve(gene_sz);
-	std::copy(&p1_gene[first_side], &p1_gene[second_side], sub_gene);
-	sub_gene.shrink_to_fit();
+	std::cout << "p1_sub_gene: ";
+	/*for (auto& e : p1_sub_gene)
+	{
+		std::cout << e << " ";
+	}
+	std::cout << "\n";*/
 
 	// delete cities in p2 
 	// mark those are duplicated  by -1
-	GeneType p2_sub;
-	p2_sub.reserve(sub_gene.size());
+	GeneType p2_sub_gene;
+	p2_sub_gene.reserve(p1_sub_gene.size());
 
-	std::copy(&p2_gene[first_side], &p2_gene[second_side], p2_sub);
-
-	std::for_each(p2_gene.begin(), p2_gene.end(), [sub_gene](auto& e)
+	for (auto i = first_side; i <= second_side; i++)
 	{
-		for (auto& c : sub_gene)
+		p2_sub_gene.emplace_back(p2_gene[i]);
+	}
+	auto tmp_p2 = p2_gene;
+	std::for_each(tmp_p2.begin(), tmp_p2.end(), [p1_sub_gene](auto& e)
+	{
+		for (auto& c : p1_sub_gene)
 		{
 			if (e == c) e = -1;
 		}
@@ -182,140 +197,195 @@ void proceed_crossover(GeneType& p1_gene, GeneType& p2_gene, int first_side, int
 	8 * 1 '2 3 0' 9 * 4 *
 	9 4 8 1
 	*/
+	/*std::cout << "p2_gene: ";
+	for (auto& e : p2_gene) std::cout << e << " ";
+	std::cout << "\n";
+*/
 	std::vector<int> stack;
-	for (auto it = p2_gene.begin() + second_side; it != p2_gene.end(); it++)
+	stack.reserve(gene_sz);
+	//std::cout << "second_side " << p2_gene[second_side] << " " << "end " << p2_gene[p2_gene.size()-1] << "\n";
+	for (auto it = second_side; it < p2_gene.size(); it++)
 	{
-		stack.emplace_back(*it);
+		int val = tmp_p2[it];
+		if (val != -1)
+		{
+			std::cout << val << " ";
+			stack.emplace_back(val);
+		}
 	}
-
-	for (auto it = p2_gene.begin(); it != p2_gene.begin() + first_side; it++)
+	//std::cout << "\n";
+	for (auto it = 0; it < second_side; it++)
 	{
-		stack.emplace_back(*it);
+		int val = tmp_p2[it];
+		if (val != -1)
+		{
+			std::cout << val << " ";
+			stack.emplace_back(val);
+		}
 	}
-
-	for (auto it = sub_gene.rbegin(); it != sub_gene.rend(); it++)
+	//std::cout << "\n";
+	for (auto it = p1_sub_gene.rbegin(); it != p1_sub_gene.rend(); it++)
 	{
-		stack.emplace_back(*it);
+		if (*it != -1)
+		{
+			std::cout << *it << " ";
+			stack.emplace_back(*it);
+		}
 	}
-
-	for (auto it = p2_sub.rbegin(); it != p2_sub.rend(); it++)
+	//std::copy(stack.rbegin(), stack.rend(), op2->gene.begin()); --> cannot copy because the gene is empty
+	for (auto it = stack.rbegin(); it != stack.rend(); it++)
 	{
-		stack.emplace_back(*it);
+		op2->gene.emplace_back(*it);
 	}
-
-	std::copy(stack.rbegin(), stack.rend(), op2.gene.begin());
-
 	// now it p1 turn 
 
-	stack.empty();
-	for (auto it = p1_gene.begin() + second_side; it != p1_gene.end(); it++)
+	stack.erase(stack.begin(), stack.end());
+	auto tmp_p1 = p1_gene;
+	std::for_each(tmp_p1.begin(), tmp_p1.end(), [p2_sub_gene](auto& e)
+	{
+		for (auto& c : p2_sub_gene)
+		{
+			if (e == c) e = -1;
+		}
+	});
+	for (auto i = second_side; i < gene_sz; i++)
+	{
+		int val = tmp_p1[i];
+		if(val != -1) stack.emplace_back(val);
+	}
+	for (auto i = 0; i < second_side; i++)
+	{
+		int val = tmp_p1[i];
+		if (val != -1) stack.emplace_back(val);
+	}
+
+	for (auto it = p2_sub_gene.rbegin(); it != p2_sub_gene.rend(); it++)
 	{
 		stack.emplace_back(*it);
 	}
 
-	for (auto it = p1_gene.begin(); it != p1_gene.begin() + first_side; it++)
+	for (auto it = stack.rbegin(); it != stack.rend(); it++)
 	{
-		stack.emplace_back(*it);
+		op1->gene.emplace_back(*it);
 	}
-
-	for (auto it = p2_sub.rbegin(); it != p2_sub.rend(); it++)
-	{
-		stack.emplace_back(*it);
-	}
-
-	for (auto it = sub_gene.rbegin(); it != sub_gene.rend(); it++)
-	{
-		stack.emplace_back(*it);
-	}
-	
-	std::copy(stack.rbegin(), stack.rend(), op1.gene.begin());
 }
-auto crossover(Individual& p1, Individual& p2)
+
+
+auto crossover(IdvUPtr& p1, IdvUPtr& p2)
 {
-	size_t gene_sz = p1.gene_sz;
-	std::array<Individual, 2> offspring_pack;
-	Individual c1{ gene_sz };
-	Individual c2{ gene_sz };
+	size_t gene_sz = p1->gene_sz;
+	std::vector<Individual*> os_pack;
+	os_pack.reserve(2);
+	Individual* c1 = new Individual(gene_sz);
+	Individual* c2 = new Individual(gene_sz);
 
-	int first_side = get_rand_int(0, gene_sz);
-	int second_side = get_rand_int(first_side, gene_sz);
+	int first_side = get_rand_int(0, gene_sz - 2);
+	int second_side = get_rand_int(first_side + 1, gene_sz - 1);
 
-	proceed_crossover(p1.gene, p2.gene, first_side, second_side, c1, c2);
+	proceed_crossover(p1->gene, p2->gene, first_side, second_side, c1, c2);
 
-	offspring_pack[0] = c1;
-	offspring_pack[1] = c2;
-	return offspring_pack;
+	os_pack.emplace_back(c1);
+	os_pack.emplace_back(c2);
+	return os_pack;
 
 }
 //random swap mutate
-auto mutate(Individual& idv)
+void mutate(IdvUPtr& idv)
 {
-	//pick two random pos
-	size_t sz = idv.gene_sz;
-	int pos1 = get_rand_int(0, sz);
-	int pos2 = get_rand_int(0, sz);
+	try
+	{
+		//pick two random pos
+		size_t sz = idv->gene_sz;
+		int pos1 = get_rand_int(0, sz);
+		int pos2 = get_rand_int(0, sz);
 
-	while (pos2 == pos1) pos2 = get_rand_int(0, sz);
+		while (pos2 == pos1) pos2 = get_rand_int(0, sz);
+
+		int a = idv->gene.at(pos1);
+		int b = idv->gene.at(pos2);
+		//swap 
+		a += b;
+		b = a - b;
+		a = a - b;
+
+		idv->gene[pos1] = a;
+		idv->gene[pos2] = b;
+	}
+	catch (std::out_of_range& oor)
+	{
+		std::cerr << oor.what() << "\n";
+	}
 	
-	int a = idv.gene.at(pos1);
-	int b = idv.gene.at(pos2);
-	//swap 
-	a += b;
-	b = a - b;
-	a = a - b;
-
-	idv.gene[pos1] = a;
-	idv.gene[pos2] = b;
 }
 
-std::vector<Individual> gen_op(std::vector<Individual>& pop, 
-		const float& rmp, const float& mutation_rate, 
+auto gen_op(PopType& pop, const double& rmp, const double& mutation_rate,
 		std::mt19937& gen, size_t max_size)
 {
 	
 	std::uniform_real_distribution<> dis(0.0, 1.0);
 
 	auto r = dis(gen);
-	std::vector<Individual> ret;
+	PopType ret;
 	ret.reserve(max_size);
 	while (ret.size() < max_size)
 	{
 		// choose two random parent 
-		auto p1 = pick_rand_parent(pop, gen);
-		auto p2 = pick_rand_parent(pop, gen);
+		int p1_idx = get_rand_int(0, pop.size() - 1);
+		int p2_idx = get_rand_int(0, pop.size() - 1);
+
+		
 		// assortative mating
 		auto r = dis(gen);
 		if (r < rmp)
 		{
-			// crossover + mutate
-			auto os_pack = crossover(p1, p2);
-			for (auto& idv : os_pack)
-			{
-				mutate(idv);
-			}
+			//crossover + mutate
+			auto os_pack = crossover(pop[p1_idx], pop[p2_idx]);
+			IdvUPtr c1{ os_pack[0] };
+			IdvUPtr c2{ os_pack[1] };
+			mutate(c1);
+			mutate(c2);
+			ret.emplace_back(std::move(c1));
+			ret.emplace_back(std::move(c2));
 		}
 		else
 		{
 			// mutate
-			mutate(p1);
-			mutate(p2);
+			mutate(pop[p1_idx]);
+			mutate(pop[p2_idx]);
 		}
 	}
 
 	return ret;
 }
 
+void eval(PopType& pop, TaskSOO task_soo, TaskMOO task_moo, 
+	DistMatType& dist_mat, size_t gene_sz, 
+	int a, int b) // two cities
+{
+	try
+	{
+		for (auto& idv : pop)
+		{
+			auto obj_pack = task_moo.eval(idv->gene, dist_mat, gene_sz, a, b);
+			idv->mo_task.val_pack = obj_pack;
+			idv->so_task.val = task_soo.eval(obj_pack);
+			std::cout << "single: " << idv->so_task.val << "\t"
+				<< "multi: f1 " << idv->mo_task.val_pack[0]
+				<< " f2 " << idv->mo_task.val_pack[1] << "\n";
+		}
+	}
+	catch (std::out_of_range or)
+	{
+		std::cerr << or.what() << "\n";
+	}
+	
+}
 
-void eval(std::vector<Individual>& pop)
+void compute_rank(PopType& pop)
 {
 
 }
-
-void compute_rank(std::vector<Individual>& pop)
-{
-
-}
-void compute_scalar_fitness(std::vector<Individual>& pop)
+void compute_scalar_fitness(PopType& pop)
 {
 
 }
@@ -337,29 +407,6 @@ int main(int argv, char** args)
 		//assign number_of_cities 
 		std::string first_line;
 		std::getline(file, first_line);
-		/*
-		// split string using string.find() and string.substr()
-
-		const std::string delimiter = "\x09";
-		
-		auto start = 0U;
-		auto end = firstLine.find(delimiter);
-		std::string token;
-		try
-		{
-			while (end != std::string::npos)
-			{
-				token = firstLine.substr(start, end - start);
-				start = end + delimiter.length();
-				end = firstLine.find(delimiter, start);
-				std::cout << token << "\n";
-				firstLineInput.emplace_back(std::stof(token, nullptr));
-			}
-		}
-		catch (const std::invalid_argument& is)
-		{
-			std::cerr << "Invalid argument: " << is.what() << "\n";
-		}*/
 		std::vector<float> tmp_pack;
 		tmp_pack.reserve(1000);
 		split_token(first_line, tmp_pack);
@@ -395,10 +442,7 @@ int main(int argv, char** args)
 		std::cerr << "Cannot read input file\n";
 	}
 	//done with the input
-	// Individual initializing 
-	Individual idv(gene_sz);
-
-	
+	// Individual initializing
 
 	const size_t POP_SZ = 100;
 	//std::array<Individual, POP_SZ> population;
@@ -408,25 +452,22 @@ int main(int argv, char** args)
 	std::iota(base_pert.begin(), base_pert.end(), 0);
 
 	// construct individuals array
-	Individual pop[POP_SZ];
+	PopType cur_pop;
+	cur_pop.reserve(POP_SZ);
 	for (auto i = 0; i < POP_SZ; i++)
 	{
-		pop[i] = Individual(gene_sz);
+		Individual* idv(new Individual(gene_sz));
+		std::unique_ptr<Individual> idv_u_ptr{ idv };
+		cur_pop.emplace_back(std::move(idv_u_ptr));
+		//cur_pop.emplace_back(new Individual(gene_sz));
 	}
 
-	
-	for (auto& i : base_pert)
-	{
-		std::cout << i << " ";
-	}
-	
 	std::cout << "done with the input\n";
 	// initialize individuals 
 
-	for (auto& idv : pop)
+	for (auto& idv : cur_pop)
 	{
-		init_population(base_pert,idv, gen);
-		//std::cout << idv.id << "\n";
+		init_population(base_pert, idv, gen);
 	}
 
 	std::cout << "done with initializing\n";
@@ -443,14 +484,6 @@ int main(int argv, char** args)
 
 	std::cout << "two selected cities: " << a << " " << b << "\n";
 
-//td::array<float, POP_SZ> idv_dist_val;
-
-
-	////test evaluation function for SOO
-	//auto val = eval_soo(pop[0].gene, dist_mat, gene_sz);
-	//std::cout << val << "\n";
-
-
 	//evaluate for each task
 
 	std::cout << "Evaluating...!\n";
@@ -458,38 +491,38 @@ int main(int argv, char** args)
 	TaskMOO task_moo;
 	TaskSOO task_soo;
 
-	for (auto& idv : pop)
-	{
-		auto obj_pack = task_moo.eval(idv.gene, dist_mat, gene_sz, a, b);
-		idv.mo_task.val_pack = obj_pack;
-		idv.so_task.val = task_soo.eval(obj_pack);
-		std::cout	<< "single: " << idv.so_task.val << "\t" 
-					<< "multi: f1 "  << idv.mo_task.val_pack[0] << " f2 " << idv.mo_task.val_pack[1] << "\n";
-	}
-
-
+	eval(cur_pop, task_soo, task_moo, dist_mat, gene_sz, a, b);
 
 	const int number_of_gens = 100;
 	int gen_count = 0;
 
-	const float rmp = 0.3;
-	const float mutation_rate = 0.2;
+	const double rmp = 0.3;
+	const double mutation_rate = 0.2;
 
 	
 	// into the loop
 	while (true)
 	{
-		std::vector<Individual> v_pop;
-		v_pop.data = pop;
-		auto offspring = gen_op(v_pop, rmp, mutation_rate, gen, POP_SZ / 2);
-		eval(offspring);
-		std::vector<Individual> inter_pop;
+		
+		// applying genetic operators
+		auto offspring = gen_op(cur_pop, rmp, mutation_rate, gen, POP_SZ / 2);
+		//evaluate offspring
+		eval(offspring, task_soo, task_moo, dist_mat, gene_sz, a, b);
+		//concatenate current pop with offspring
+		PopType inter_pop;
 		inter_pop.reserve(POP_SZ + offspring.size());
-		std::copy(&pop[0], &pop[POP_SZ - 1], inter_pop);
-		inter_pop.insert(inter_pop.end(), offspring.begin(), offspring.end());
-
+		inter_pop.insert(inter_pop.begin(),
+			std::make_move_iterator(cur_pop.begin()),
+			std::make_move_iterator(cur_pop.end()));
+		inter_pop.insert(inter_pop.end(),
+			std::make_move_iterator(offspring.begin()),
+			std::make_move_iterator(offspring.end()));
+		//inter_pop.insert(inter_pop.end(), offspring.begin(), offspring.end());
+		// compute rank
 		compute_rank(inter_pop);
+		// assign scalar fitness
 		compute_scalar_fitness(inter_pop);
+		// select for next generation
 		select();
 
 	}
