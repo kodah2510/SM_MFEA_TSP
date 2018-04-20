@@ -150,14 +150,12 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Src\Individual.h" />
     <ClInclude Include="Src\RandomGenerator.h" />
     <ClInclude Include="Src\SMMFEA.h" />
     <ClInclude Include="Src\stdafx.h" />
     <ClInclude Include="Src\targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Src\Individual.cpp" />
     <ClCompile Include="Src\Main.cpp" />
     <ClCompile Include="Src\SMMFEA.cpp" />
     <ClCompile Include="Src\stdafx.cpp">

@@ -14,10 +14,10 @@ public:
 	size_t gene_sz;
 	std::vector<int> gene;
 	SOTask so_task;
-	MOTask<2> mo_task; 
+	MOTask<2> mo_task;
+	double scalar_fitness;
+
 
 	void init();
 	//void add_task(Task& m_task);
 };
-
-

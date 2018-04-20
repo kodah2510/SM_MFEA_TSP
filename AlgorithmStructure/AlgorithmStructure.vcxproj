@@ -116,6 +116,7 @@
     <ClInclude Include="CrossoverOperator.h" />
     <ClInclude Include="DataStructure.h" />
     <ClInclude Include="Evaluator.h" />
+    <ClInclude Include="Individual.h" />
     <ClInclude Include="MutationOperator.h" />
     <ClInclude Include="Tasks.h" />
   </ItemGroup>
@@ -123,6 +124,7 @@
     <ClCompile Include="Algorithm.cpp" />
     <ClCompile Include="CrossoverOperator.cpp" />
     <ClCompile Include="Evaluator.cpp" />
+    <ClCompile Include="Individual.cpp" />
     <ClCompile Include="MutationOperator.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

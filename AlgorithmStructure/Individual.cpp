@@ -1,6 +1,6 @@
-#include "stdafx.h"
-#include "Individual.h"
 #include <iostream>
+
+#include "Individual.h"
 
 
 Individual::Individual()
@@ -11,7 +11,7 @@ Individual::Individual(size_t m_gene_sz) : gene_sz(m_gene_sz)
 {
 	std::cout << "Individual constructed !\n";
 	gene.reserve(m_gene_sz);
-	
+
 }
 
 
@@ -24,5 +24,3 @@ void Individual::init()
 {
 
 }
-
-

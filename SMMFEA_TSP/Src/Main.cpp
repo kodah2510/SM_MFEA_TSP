@@ -20,8 +20,8 @@
 using GeneType = std::vector<int>;
 using DistMatType = std::vector<float>;
 using PosType = GeneType::iterator;
-
-using PopType = std::vector<std::unique_ptr<Individual>>;
+using IdvSPtr = std::shared_ptr<Individual>;
+using PopType = std::vector<IdvSPtr>;
 
 std::random_device rd;
 std::mt19937 gen(rd());
@@ -46,8 +46,8 @@ void split_token(std::string& line, std::vector<float>& values_pack)
 	);
 }
 
-using IdvUPtr = std::unique_ptr<Individual>;
-void init_population(std::vector<int>& pert_arr, std::unique_ptr<Individual>& idv, std::mt19937& gen )
+
+void init_population(std::vector<int>& pert_arr, IdvSPtr& idv, std::mt19937& gen )
 {
 	
 	std::shuffle(pert_arr.begin(), pert_arr.end(), gen);
@@ -204,7 +204,7 @@ void proceed_crossover(GeneType p1_gene, GeneType p2_gene, // made a copy
 	std::vector<int> stack;
 	stack.reserve(gene_sz);
 	//std::cout << "second_side " << p2_gene[second_side] << " " << "end " << p2_gene[p2_gene.size()-1] << "\n";
-	for (auto it = second_side; it < p2_gene.size(); it++)
+	for (size_t it = second_side; it < p2_gene.size(); it++)
 	{
 		int val = tmp_p2[it];
 		if (val != -1)
@@ -248,7 +248,7 @@ void proceed_crossover(GeneType p1_gene, GeneType p2_gene, // made a copy
 			if (e == c) e = -1;
 		}
 	});
-	for (auto i = second_side; i < gene_sz; i++)
+	for (size_t i = second_side; i < gene_sz; i++)
 	{
 		int val = tmp_p1[i];
 		if(val != -1) stack.emplace_back(val);
@@ -271,7 +271,7 @@ void proceed_crossover(GeneType p1_gene, GeneType p2_gene, // made a copy
 }
 
 
-auto crossover(IdvUPtr& p1, IdvUPtr& p2)
+auto crossover(IdvSPtr& p1, IdvSPtr& p2)
 {
 	size_t gene_sz = p1->gene_sz;
 	std::vector<Individual*> os_pack;
@@ -290,7 +290,7 @@ auto crossover(IdvUPtr& p1, IdvUPtr& p2)
 
 }
 //random swap mutate
-void mutate(IdvUPtr& idv)
+void mutate(IdvSPtr& idv)
 {
 	try
 	{
@@ -321,7 +321,6 @@ void mutate(IdvUPtr& idv)
 auto gen_op(PopType& pop, const double& rmp, const double& mutation_rate,
 		std::mt19937& gen, size_t max_size)
 {
-	
 	std::uniform_real_distribution<> dis(0.0, 1.0);
 
 	auto r = dis(gen);
@@ -340,8 +339,8 @@ auto gen_op(PopType& pop, const double& rmp, const double& mutation_rate,
 		{
 			//crossover + mutate
 			auto os_pack = crossover(pop[p1_idx], pop[p2_idx]);
-			IdvUPtr c1{ os_pack[0] };
-			IdvUPtr c2{ os_pack[1] };
+			IdvSPtr c1{ os_pack[0] };
+			IdvSPtr c2{ os_pack[1] };
 			mutate(c1);
 			mutate(c2);
 			ret.emplace_back(std::move(c1));
@@ -362,6 +361,9 @@ void eval(PopType& pop, TaskSOO task_soo, TaskMOO task_moo,
 	DistMatType& dist_mat, size_t gene_sz, 
 	int a, int b) // two cities
 {
+	std::ofstream output_file;
+	output_file.open("eval.txt");
+
 	try
 	{
 		for (auto& idv : pop)
@@ -372,7 +374,10 @@ void eval(PopType& pop, TaskSOO task_soo, TaskMOO task_moo,
 			std::cout << "single: " << idv->so_task.val << "\t"
 				<< "multi: f1 " << idv->mo_task.val_pack[0]
 				<< " f2 " << idv->mo_task.val_pack[1] << "\n";
+
+			
 		}
+		output_file.close();
 	}
 	catch (std::out_of_range or)
 	{
@@ -380,18 +385,216 @@ void eval(PopType& pop, TaskSOO task_soo, TaskMOO task_moo,
 	}
 	
 }
+bool is_dominate(IdvSPtr& a, IdvSPtr& b)
+{
+	bool state = false;
+	/*std::cout << "compare\n";
+	std::cout << a->mo_task.val_pack[0] << " " << b->mo_task.val_pack[0] << "\n";
+	std::cout << a->mo_task.val_pack[1] << " " << b->mo_task.val_pack[1] << "\n";*/
+	for (size_t i = 0; i < a->mo_task.val_pack.size(); i++)
+	{
+		auto fa = a->mo_task.val_pack[i];
+		auto fb = b->mo_task.val_pack[i];
+		//std::cout << fa << " " << fb << "\n";
+		if (fa < fb)
+		{
+			state = true;
+		}
+		else if (fa > fb)
+		{
+			return false;
+		}
+	}
+	return state;
+}
+
+auto fast_non_dominated_sort(PopType& pop)
+{
+	std::vector<std::vector<size_t>> S;
+	S.resize(pop.size());
+	std::vector<int> n;
+	n.resize(pop.size());
+
+	std::vector<std::vector<size_t>> fronts;
+	fronts.resize(5);
+	for (auto& f : fronts)
+	{
+		f.reserve(pop.size());
+	}
+
+	for (size_t i = 0; i < pop.size() - 1; i++)
+	{
+		//np is already initialized
+		auto p = pop[i];
+		S[i].reserve(pop.size());
+		for (size_t j = 0; j < pop.size(); j++)
+		{
+			if (j == i) continue;
+			auto q = pop[j];
+			if (is_dominate(p, q)) // if p dominate q
+			{
+				//Sp[i].emplace_back(q);
+				S[i].emplace_back(j);
+			}
+			else if (is_dominate(q, p))
+			{
+				n[i]++;
+			}
+		}
+		std::cout << n[i] << " ";
+		if (n[i] == 0)
+		{
+			p->mo_task.nf = 1;
+			fronts[0].emplace_back(i);
+		}
+		S[i].shrink_to_fit();
+	}
+
+	auto fc = 0; // front_counter
+	while (!fronts[fc].empty())
+	{
+		std::vector<size_t> Q;
+		Q.reserve(pop.size());
+		for (auto& p : fronts[fc]) // p is index
+		{
+			for (auto& q : S[p]) // q is index
+			{
+				auto nq = n[q];
+				nq--;
+				if (nq == 0)
+				{
+					pop[q]->mo_task.nf++;
+					Q.emplace_back(q);
+				}
+			}
+		}
+		fc++;
+		for (auto& q : Q)
+		{
+			fronts[fc].emplace_back(q);
+		}
+	}
+	
+	return fronts;
+}
+
+void crowding_distance(std::vector<size_t>& front, PopType& pop)
+{
+	size_t sz = front.size();
+	
+	size_t num_obj = pop[0]->mo_task.val_pack.size();
+
+	for (size_t i = 0; i < num_obj; i++)
+	{
+		std::sort(front.begin(), front.end(), [i, pop](auto& a, auto& b)
+		{
+			return pop[a]->mo_task.val_pack[i] < pop[b]->mo_task.val_pack[i];
+		});
+
+		double f_max = pop.at(front[sz - 1])->mo_task.val_pack[i];
+		double f_min = pop.at(front[0])->mo_task.val_pack[i];
+
+		pop[front[0]]->mo_task.cd = pop[front[sz - 1]]->mo_task.cd = INFINITY;
+		for (auto j = 1; j < sz - 1; j++)
+		{
+			pop[front[i]]->mo_task.cd += (pop.at(front[j + 1])->mo_task.val_pack[i] - pop.at(front[j - 1])->mo_task.val_pack[i]) / (f_max - f_min);
+		}
+	}
+}
+
+void compute_mo_rank(PopType& pop)
+{
+	auto fronts = fast_non_dominated_sort(pop);
+	for (auto f : fronts)
+	{
+		if(f.size() != 0) crowding_distance(f, pop);
+	}
+
+	std::sort(pop.begin(), pop.end(), [](IdvSPtr& a, IdvSPtr& b) 
+	{
+		if (a->mo_task.nf < b->mo_task.nf)
+		{
+			return true;
+		}
+		else if(a->mo_task.nf == b->mo_task.nf)
+		{
+			if (a->mo_task.cd > b->mo_task.cd)
+				return true;
+			else return false;
+		}
+		else return false;
+	});
+
+	for (size_t i = 0; i < pop.size(); i++)
+	{
+		pop[i]->mo_task.rank = i + 1;
+	}
+}
+
+void compute_so_rank(PopType& pop)
+{
+	std::sort(pop.begin(), pop.end(), [](IdvSPtr& a, IdvSPtr& b)
+	{
+		return a->so_task.val < b->so_task.val;
+	});
+
+	//assign rank 
+	for (size_t i = 0; i < pop.size(); i++)
+	{
+		pop[i]->so_task.rank = i + 1; // avoid rank is 0
+	}
+}
 
 void compute_rank(PopType& pop)
 {
+	//compute for soo ->> easy :)) 
+	compute_so_rank(pop);
 
+
+	// fast_none_dominated_sort
+	// compute for moo 
+	// np the number of solutions dominating p
+	// Sp a set of solution dominated by p
+	//
+	compute_mo_rank(pop);
+
+	std::cout << "RANKING\n";
+	for (auto& p : pop)
+	{
+		std::cout << "so: " << p->so_task.rank << " mo: " << p->mo_task.rank << "\n";
+	}
 }
 void compute_scalar_fitness(PopType& pop)
 {
-
+	for (auto& idv : pop)
+	{
+		idv->scalar_fitness = 1 / std::max(idv->so_task.rank, idv->mo_task.rank);
+	}
 }
-void select()
+void select(PopType& inter_pop, PopType& cur_pop)
 {
+	//sort by scalar fitness
+	std::sort(inter_pop.begin(), inter_pop.end(), [](IdvSPtr& a, IdvSPtr& b)
+	{
+		return a->scalar_fitness > b->scalar_fitness;
+	});
 
+	//select
+	auto sz = cur_pop.size();
+	cur_pop.clear();
+	cur_pop.insert(cur_pop.begin(), inter_pop.begin(), inter_pop.begin() + sz);
+}
+
+void print_file(PopType& pop)
+{
+	std::ofstream of;
+	of.open("eval.txt");
+
+	for (auto& p : pop)
+	{
+		of << p->mo_task.val_pack[0] << " " << p->mo_task.val_pack[1] << "\n";
+	}
+	of.close();
 }
 int main(int argv, char** args)
 {
@@ -517,14 +720,15 @@ int main(int argv, char** args)
 		inter_pop.insert(inter_pop.end(),
 			std::make_move_iterator(offspring.begin()),
 			std::make_move_iterator(offspring.end()));
+
+		print_file(inter_pop);
 		//inter_pop.insert(inter_pop.end(), offspring.begin(), offspring.end());
 		// compute rank
 		compute_rank(inter_pop);
 		// assign scalar fitness
 		compute_scalar_fitness(inter_pop);
 		// select for next generation
-		select();
-
+		select(inter_pop, cur_pop);
 	}
 
 	std::cin.get();
