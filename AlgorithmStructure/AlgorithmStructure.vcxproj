@@ -113,19 +113,20 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Algorithm.h" />
-    <ClInclude Include="CrossoverOperator.h" />
-    <ClInclude Include="DataStructure.h" />
+    <ClInclude Include="Operators\CrossoverOperator.h" />
     <ClInclude Include="Evaluator.h" />
     <ClInclude Include="Individual.h" />
-    <ClInclude Include="MutationOperator.h" />
+    <ClInclude Include="Operators\MutationOperator.h" />
     <ClInclude Include="Tasks.h" />
+    <ClInclude Include="Ultility\Alias.h" />
+    <ClInclude Include="Ultility\IOHandler.h" />
+    <ClInclude Include="Operators\LocalSearchOperator.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Algorithm.cpp" />
-    <ClCompile Include="CrossoverOperator.cpp" />
     <ClCompile Include="Evaluator.cpp" />
     <ClCompile Include="Individual.cpp" />
-    <ClCompile Include="MutationOperator.cpp" />
+    <ClCompile Include="Ultility\IOHandler.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

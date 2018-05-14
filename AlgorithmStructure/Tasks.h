@@ -7,7 +7,7 @@
 
 struct SOTask
 {
-	float val;
+	float val = INFINITY;
 	int rank;
 };
 
@@ -17,5 +17,5 @@ struct MOTask
 	std::array<float, num_obj> val_pack;
 	int rank;
 	int nf;
-	double cd;
+	double cd = 0;
 };

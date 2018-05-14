@@ -14,4 +14,30 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="TSPLIB\bier127.tsp" />
+    <None Include="TSPLIB\ch130.tsp" />
+    <None Include="TSPLIB\eil51.tsp" />
+    <None Include="TSPLIB\kroA150.tsp" />
+    <None Include="TSPLIB\kroA200.tsp" />
+    <None Include="TSPLIB\kroB150.tsp" />
+    <None Include="TSPLIB\kroB200.tsp" />
+    <None Include="TSPLIB\lin105.tsp" />
+    <None Include="TSPLIB\pr76.tsp" />
+    <None Include="TSPLIB\pr107.tsp" />
+    <None Include="TSPLIB\pr136.tsp" />
+    <None Include="TSPLIB\pr144.tsp" />
+    <None Include="TSPLIB\pr152.tsp" />
+    <None Include="TSPLIB\pr226.tsp" />
+    <None Include="TSPLIB\pr264.tsp" />
+    <None Include="TSPLIB\pr299.tsp" />
+    <None Include="TSPLIB\rat195.tsp" />
+    <None Include="TSPLIB\ts225.tsp" />
+    <None Include="TSPLIB\u159.tsp" />
+  </ItemGroup>
 </Project>

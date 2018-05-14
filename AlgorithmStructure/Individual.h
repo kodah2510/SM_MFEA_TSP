@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <array>
+
 #include "Tasks.h"
 enum SKILL_FACTOR {SO, MO};
 class Individual
