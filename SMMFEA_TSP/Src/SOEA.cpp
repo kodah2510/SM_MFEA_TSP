@@ -51,16 +51,24 @@ auto SOEA::gen_op(PopType& pop, size_t max_size)
 		IdvSPtr c1{ os_pack[0] };
 		IdvSPtr c2{ os_pack[1] };
 
+		auto r = dis(gen);
+		if (r < mutation_rate)
+		{
+			auto mutate_c1 = mutate_op->mutate(c1);
+			ret.emplace_back(mutate_c1);
+			ret.emplace_back(c2);
+			continue;
+		}
+		r = dis(gen);
+		if (r < mutation_rate)
+		{
+			auto mutate_c2 = mutate_op->mutate(c2);
+			ret.emplace_back(mutate_c2);
+			ret.emplace_back(c1);
+			continue;
+		}
 		ret.emplace_back(c1);
 		ret.emplace_back(c2);
-	}
-
-	for (auto& idv : ret)
-	{
-		if (dis(gen) <= mutation_rate)
-		{
-			mutate_op->mutate(idv);
-		}
 	}
 	return ret;
 }

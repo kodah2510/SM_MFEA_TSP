@@ -39,8 +39,8 @@ void Evaluator::eval(PopType& cur_pop, DistMatType& dist_mat, size_t& gene_sz, i
 
 float Evaluator::f1(GeneType & gene, DistMatType & dist_mat, size_t base, PosType & pos_a, PosType & pos_b)
 {
-	auto  ret = 0.0f;
-	for (auto it = pos_a; it != pos_b - 1; it++)
+	auto ret = 0.0f;
+	for (auto it = pos_a; it <= pos_b - 1; it++)
 	{
 		auto row = *it;
 		auto col = *(it + 1);
@@ -52,18 +52,17 @@ float Evaluator::f1(GeneType & gene, DistMatType & dist_mat, size_t base, PosTyp
 
 float Evaluator::f2(GeneType & gene, DistMatType & dist_mat, size_t base, PosType & pos_a, PosType & pos_b)
 {
-
 	auto ret = 0.0f;
-	if (pos_a == gene.begin())
+	if (pos_a == gene.begin()) // a * * * * *  b * * * 
 	{
-		for (auto it = pos_b; it != gene.end() - 1; it++)
+		for (auto it = pos_b; it <= gene.end() - 1; it++)
 		{
 			auto row = *it;
 			auto col = *(it + 1);
 			ret += dist_mat[row * base + col];
 		}
 	}
-	else if(pos_b == gene.end())
+	else if(pos_b == gene.end()) 
 	{
 		for (auto it = gene.begin(); it != pos_a - 1; it++)
 		{
@@ -73,9 +72,9 @@ float Evaluator::f2(GeneType & gene, DistMatType & dist_mat, size_t base, PosTyp
 			ret += dist_mat[row * base + col];
 		}
 	}
-	else
+	else							
 	{
-		for (auto it = gene.begin(); it != pos_a - 1; it++)
+		for (auto it = gene.begin(); it <= pos_a - 1; it++)
 		{
 			auto row = *it;
 			auto col = *(it + 1);
@@ -124,14 +123,14 @@ void Evaluator::eval(PopType & cur_pop, DistMatType & dist_mat, size_t gene_sz)
 	for (auto& idv : cur_pop)
 	{
 		float res = 0;
+		auto gene = idv->gene;
 		for (size_t i = 0; i < gene_sz - 1; i++)
 		{
-			auto gene = idv->gene;
 			auto row = gene[i];
 			auto col = gene[i + 1];
 			res += dist_mat[row*gene_sz + col];
 		}
-		res += dist_mat[idv->gene[gene_sz - 1] * gene_sz + idv->gene[0]];
+		res += dist_mat[gene[gene_sz - 1] * gene_sz + gene[0]];
 		idv->so_task.val = res;
 	}
 }

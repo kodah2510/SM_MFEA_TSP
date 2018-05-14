@@ -382,6 +382,7 @@ void SMMFEA::run(DistMatType& dist_mat, IOHandler& io_handler)
 		std::cout << "\n";*/
 
 		std::cout << "generation " << gen_count << "\n";
+
 		auto idv1 = cur_pop[0];
 		auto idv2 = cur_pop[1];
 
@@ -393,14 +394,14 @@ void SMMFEA::run(DistMatType& dist_mat, IOHandler& io_handler)
 					<< "mo: "			<< std::setw(10)	<< idv2->mo_task.val_pack[0] << " " << idv2->mo_task.val_pack[1] << "\t"
 					<< "skill factor "	<< std::setw(2)		<< idv2->skill_factor << "\n";
 
-		/*for (auto& idv : cur_pop)
-		{
-			std::cout << idv->so_task.val << " " << idv->skill_factor << " " << idv->scalar_fitness  << "\n";
-		}*/
+		//for (auto& idv : cur_pop)
+		//{
+		//	std::cout << idv->so_task.val << " " << idv->skill_factor << " " << idv->scalar_fitness  << "\n";
+		//}
 		gen_count++;
 
 		//record the dist_val and f1 f2 of the first fron
-		//of_dv << idv2->so_task.val  << "\n";
+		of_dv << idv2->so_task.val  << "\n";
 	}
 
 	for (auto& idv : cur_pop)

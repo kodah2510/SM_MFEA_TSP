@@ -34,11 +34,11 @@ int main(int argv, char** args)
 	const std::string folder_name = "Input\\";
 	std::vector<std::string> input_files = {
 		//"eil51.txt",
-		//"bier127.txt",
-		//"ch130.txt",
-		//"kroA150.txt",
+		"bier127.txt",
+		/*"ch130.txt",
+		"kroA150.txt",
 		"kroA200.txt",
-		/*"kroB150.txt",
+		"kroB150.txt",
 		"kroB200.txt",
 		"lin105.txt",
 		"pr76.txt",
@@ -62,6 +62,7 @@ int main(int argv, char** args)
 		size_t pop_sz = 100;
 		std::vector<int> base_pert(gene_sz);
 		std::iota(base_pert.begin(), base_pert.end(), 0);
+
 		std::cout << "SMMFEA\n";
 		SMMFEA smmfea;
 		smmfea.set_crossover_operator(new OrderCrossoverOperator());
