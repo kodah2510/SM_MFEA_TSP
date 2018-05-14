@@ -55,7 +55,7 @@ float Evaluator::f2(GeneType & gene, DistMatType & dist_mat, size_t base, PosTyp
 	auto ret = 0.0f;
 	if (pos_a == gene.begin()) // a * * * * *  b * * * 
 	{
-		for (auto it = pos_b; it <= gene.end() - 1; it++)
+		for (auto it = pos_b; it != gene.end() - 1; it++)
 		{
 			auto row = *it;
 			auto col = *(it + 1);
@@ -64,7 +64,7 @@ float Evaluator::f2(GeneType & gene, DistMatType & dist_mat, size_t base, PosTyp
 	}
 	else if(pos_b == gene.end()) 
 	{
-		for (auto it = gene.begin(); it != pos_a - 1; it++)
+		for (auto it = gene.begin(); it <= pos_a - 1; it++)
 		{
 			auto row = *it;
 			auto col = *(it + 1);

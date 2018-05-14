@@ -324,10 +324,10 @@ void SMMFEA::run(DistMatType& dist_mat, IOHandler& io_handler)
 	//output file setup
 	auto problem_name = io_handler.get_problem_name();
 	std::ofstream of_dv;
-	of_dv.open(name + "_" + problem_name + "_dv.txt");
+	of_dv.open(".\\Result\\SMMFEA\\" + name + "_" + problem_name + "_dv.txt");
 
 	std::ofstream of_front;
-	of_front.open(name + "_" + problem_name + "_front.txt");
+	of_front.open(".\\Result\\SMMFEA\\" + name + "_" + problem_name + "_front.txt");
 
 	//evaluating
 	std::cout << "Evaluating...!\n";

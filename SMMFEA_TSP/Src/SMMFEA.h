@@ -21,7 +21,7 @@ public:
 	//setting up algorithm's parameters
 	const int number_of_gens = 100;
 
-	const double rmp = 0.8;
+	const double rmp = 0.3;
 	const double mutation_rate = 0.2;
 
 	void init(size_t& POP_SZ, size_t& gene_sz, GeneType& base_pert);

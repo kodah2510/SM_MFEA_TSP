@@ -69,17 +69,19 @@ auto MOEA::gen_op(PopType & pop, size_t max_size)
 
 void MOEA::run(DistMatType & dist_mat, IOHandler & io_handler)
 {
+	auto problem_name = io_handler.get_problem_name();
+	std::ofstream	of_dv;
+	of_dv.open(".\\Result\\MOEA\\" + algorithm_name + "_" + problem_name + "_dv.txt");
+
+	std::ofstream	of_front;
+	of_front.open(".\\Result\\MOEA\\" + algorithm_name + "_" + problem_name + "_front.txt");
+
+
 	Evaluator evaluator;
 	evaluator.eval(cur_pop, dist_mat, gene_sz, a, b);
 	int gen_count = 0;
 
-	auto problem_name = io_handler.get_problem_name();
-	std::ofstream of_dv;
-	of_dv.open(algorithm_name + "_" + problem_name + "_dv.txt");
-
-	std::ofstream of_front;
-	of_front.open(algorithm_name + "_" + problem_name + "_front.txt");
-
+	
 	while (gen_count < number_of_gens)
 	{
 		//generating
@@ -105,8 +107,8 @@ void MOEA::run(DistMatType & dist_mat, IOHandler & io_handler)
 		std::cout << "generation " << gen_count << "\n";
 		gen_count++;
 
-		auto idv = cur_pop[0];
-		double min = INFINITY;
+		auto	idv = cur_pop[0];
+		double	min = INFINITY;
 		for (auto& idv : cur_pop)
 		{
 			if (idv->mo_task.nf == 0)

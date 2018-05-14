@@ -76,7 +76,7 @@ void SOEA::run(DistMatType& dist_mat, IOHandler& io_handler)
 {
 	auto problem_name = io_handler.get_problem_name();
 	std::ofstream of_dv;
-	of_dv.open(algorithm_name + "_" + problem_name + "_dv.txt");
+	of_dv.open(".\\Result\\SOEA\\" + algorithm_name + "_" + problem_name + "_dv.txt");
 
 	std::cout << "evaluating current pop...\n";
 	Evaluator evaluator;
