@@ -47,7 +47,7 @@ auto SMMFEA::gen_op(PopType & pop, const double & rmp, const double & mutation_r
 		 //choose two random parent 
 		int p1_idx = Ultility::get_rand_int(0, pop.size() - 1);
 		int p2_idx = Ultility::get_rand_int(0, pop.size() - 1);
-
+		//std::cout << p1_idx << " " << p2_idx << "\n";
 		 //assortative mating
 		auto r = dis(gen);
 		auto p1 = pop[p1_idx];
@@ -55,9 +55,13 @@ auto SMMFEA::gen_op(PopType & pop, const double & rmp, const double & mutation_r
 		if (r < rmp || p1->skill_factor == p2->skill_factor)
 		{
 			//crossover + mutate
-			auto os_pack = cross_op->crossover(pop[p1_idx], pop[p2_idx]);
+			auto os_pack = cross_op->crossover(p1, p2);
 			IdvSPtr c1{ os_pack[0] };
 			IdvSPtr c2{ os_pack[1] };
+		/*	for (auto& g : c1->gene) std::cout << g << " ";
+			std::cout << "\n";
+			for (auto& g : c2->gene) std::cout << g << " ";
+			std::cout << "\n";*/
 			auto sf_rand = dis(gen);
 			if (sf_rand < 0.5)
 			{
@@ -70,26 +74,28 @@ auto SMMFEA::gen_op(PopType & pop, const double & rmp, const double & mutation_r
 				c2->skill_factor = p1->skill_factor;
 			}
 			auto mut_rand = dis(gen);
-			if (mut_rand < mutation_rate)
-			{
-				auto mutated_c1 = mutate_op->mutate(c1);
-				auto mutated_c2 = mutate_op->mutate(c2);
-				ret.emplace_back(mutated_c1);
-				ret.emplace_back(mutated_c2);
-			}
-			else
-			{
-				ret.emplace_back(c1);
-				ret.emplace_back(c2);
-			}
-		}
-		else
-		{
-			auto c1 = mutate_op->mutate(pop[p1_idx]);
-			auto c2 = mutate_op->mutate(pop[p2_idx]);
+			
+			/*auto mutated_c1 = mutate_op->mutate(c1);
+			auto mutated_c2 = mutate_op->mutate(c2);*/
+			/*std::shuffle(c1->gene.begin(), c1->gene.end(), gen);
+			std::shuffle(c2->gene.begin(), c2->gene.end(), gen);*/
+
+			//ret.emplace_back(mutated_c1);
+			//ret.emplace_back(mutated_c2);
 
 			ret.emplace_back(c1);
 			ret.emplace_back(c2);
+		
+		}
+		else
+		{
+			if (dis(gen) < mutation_rate)
+			{
+				auto c1 = mutate_op->mutate(pop[p1_idx]);
+				ret.emplace_back(c1);
+				auto c2 = mutate_op->mutate(pop[p2_idx]);
+				ret.emplace_back(c2);
+			}
 		}
 	}
 	return ret;
@@ -213,6 +219,17 @@ auto SMMFEA::fast_non_dominated_sort(PopType & pop)
 			fronts[fc].emplace_back(q);
 		}
 	}
+	for (size_t i = 0; i < pop.size(); i++)
+	{
+		if (pop[i]->mo_task.nf != 0) continue;
+		else
+		{
+			if (std::find(fronts[0].begin(), fronts[0].end(), i) == std::end(fronts[0]))
+			{
+				pop[i]->mo_task.nf = 100;
+			}
+		}
+	}
 
 	return fronts;
 }
@@ -224,10 +241,10 @@ void SMMFEA::compute_mo_rank(PopType & pop)
 		if (f.size() != 0)
 		{
 			crowding_distance(f, pop);
-			/*std::cout << "out cd \n";
-			for (auto& idx : f)
+			//std::cout << "out cd \n";
+			/*for (auto& idx : f)
 			{
-			std::cout <<  pop[idx]->mo_task.cd << "\n";
+				std::cout << pop[idx]->mo_task.nf << "\t" << pop[idx]->mo_task.cd << "\n";
 			}*/
 		}
 	}
@@ -252,7 +269,7 @@ void SMMFEA::compute_mo_rank(PopType & pop)
 
 	/*for (auto& idv : pop)
 	{
-		std::cout << idv->so_task.val << "\n";
+		std::cout << idv->so_task.val << "\t" << idv->mo_task.nf << "\t" << idv->mo_task.cd << "\n";
 	}*/
 
 	for (size_t i = 0; i < pop.size(); i++)
@@ -276,13 +293,14 @@ void SMMFEA::compute_so_rank(PopType & pop)
 }
 void SMMFEA::compute_rank(PopType & pop)
 {
+	compute_mo_rank(pop);
+
 	compute_so_rank(pop);
 	/*for (auto& idv : pop)
 	{
 		std::cout << idv->so_task.rank << "\n";
 	}
 	std::cout << "\n";*/
-	compute_mo_rank(pop);
 	/*for (auto& idv : pop)
 	{
 		std::cout << idv->mo_task.rank << "\n";
@@ -333,10 +351,19 @@ void SMMFEA::run(DistMatType& dist_mat, IOHandler& io_handler)
 	std::cout << "Evaluating...!\n";
 	Evaluator evaluator;
 	evaluator.eval(cur_pop, dist_mat, gene_sz, a, b);
+	
 	int gen_count = 0;
 
 	compute_rank(cur_pop);
 	compute_scalar_fitness(cur_pop);
+
+	/*for (auto& idv : cur_pop)
+	{
+		std::cout	<< "so: " << std::setw(7)  << idv->so_task.val << "\t"
+					<< "mo: " << std::setw(10) << idv->mo_task.val_pack[0] << "\t" << idv->mo_task.val_pack[1] << "\t"
+					<< "rank so: "			   << idv->so_task.rank << "\t mo " << idv->mo_task.rank << "\t"
+					<< "scalar fitness: "      << idv->scalar_fitness << "\n";
+	}*/
 
 	while (gen_count < number_of_gens)
 	{
@@ -383,8 +410,8 @@ void SMMFEA::run(DistMatType& dist_mat, IOHandler& io_handler)
 
 		std::cout << "generation " << gen_count << "\n";
 
-		auto idv1 = cur_pop[0];
-		auto idv2 = cur_pop[1];
+		auto idv1 = cur_pop[1];
+		auto idv2 = cur_pop[0];
 
 		std::cout	<< "so: "			<< std::setw(7)		<< idv1->so_task.val << "\t" 
 					<< "mo: "			<< std::setw(10)	<< idv1->mo_task.val_pack[0] << " " << idv1->mo_task.val_pack[1] << "\t" 
@@ -400,8 +427,12 @@ void SMMFEA::run(DistMatType& dist_mat, IOHandler& io_handler)
 		//}
 		gen_count++;
 
-		//record the dist_val and f1 f2 of the first fron
-		of_dv << idv2->so_task.val  << "\n";
+		//record the dist_val and f1 f2 of the first front
+		of_dv << idv2->so_task.val << "\n";
+		/*if (idv2->skill_factor == SKILL_FACTOR::SO)
+		{
+			
+		}*/
 	}
 
 	for (auto& idv : cur_pop)

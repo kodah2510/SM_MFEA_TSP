@@ -33,8 +33,8 @@ int main(int argv, char** args)
 	size_t gene_sz = 0;
 	const std::string folder_name = "Input\\";
 	std::vector<std::string> input_files = {
-		/*"eil51.txt",
-		"bier127.txt",
+		"eil51.txt",
+		/*"bier127.txt",
 		"ch130.txt",
 		"kroA150.txt",
 		"kroA200.txt",
@@ -48,15 +48,14 @@ int main(int argv, char** args)
 		"pr152.txt",
 		"pr226.txt",
 		"pr264.txt",
-		"pr299.txt",*/
-		"rat195.txt"
+		"pr299.txt",
+		"rat195.txt"*/
 	};
 	for (auto& input_file : input_files)
 	{
 		IOHandler io_handler;
 		dist_mat = io_handler.read_mat(folder_name + input_file, gene_sz);
 		//done with the input
-
 
 		// Individual initializing
 		size_t pop_sz = 100;
@@ -91,7 +90,7 @@ int main(int argv, char** args)
 		moea.run(dist_mat, io_handler);
 
 	}
-	
+	std::cout << "all done\n";
 	
 	std::cin.get();
     return 0;

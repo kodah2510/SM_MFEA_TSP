@@ -16,6 +16,6 @@ struct MOTask
 {
 	std::array<float, num_obj> val_pack;
 	int rank;
-	int nf;
+	int nf = 0;
 	double cd = 0;
 };

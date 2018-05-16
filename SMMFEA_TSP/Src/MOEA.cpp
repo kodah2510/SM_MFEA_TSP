@@ -226,7 +226,17 @@ auto MOEA::fast_non_dominated_sort(PopType & pop)
 			fronts[fc].emplace_back(q);
 		}
 	}
-
+	for (size_t i = 0; i < pop.size(); i++)
+	{
+		if (pop[i]->mo_task.nf != 0) continue;
+		else
+		{
+			if (std::find(fronts[0].begin(), fronts[0].end(), i) == std::end(fronts[0]))
+			{
+				pop[i]->mo_task.nf = 100;
+			}
+		}
+	}
 	return fronts;
 }
 void MOEA::crowding_sort(PopType & pop)
