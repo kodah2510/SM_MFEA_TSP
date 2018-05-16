@@ -34,7 +34,7 @@ int main(int argv, char** args)
 	const std::string folder_name = "Input\\";
 	std::vector<std::string> input_files = {
 		"eil51.txt",
-		/*"bier127.txt",
+		"bier127.txt",
 		"ch130.txt",
 		"kroA150.txt",
 		"kroA200.txt",
@@ -49,7 +49,7 @@ int main(int argv, char** args)
 		"pr226.txt",
 		"pr264.txt",
 		"pr299.txt",
-		"rat195.txt"*/
+		"rat195.txt"
 	};
 	for (auto& input_file : input_files)
 	{

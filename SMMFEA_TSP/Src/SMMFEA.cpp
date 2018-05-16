@@ -75,16 +75,16 @@ auto SMMFEA::gen_op(PopType & pop, const double & rmp, const double & mutation_r
 			}
 			auto mut_rand = dis(gen);
 			
-			/*auto mutated_c1 = mutate_op->mutate(c1);
-			auto mutated_c2 = mutate_op->mutate(c2);*/
+			auto mutated_c1 = mutate_op->mutate(c1);
+			auto mutated_c2 = mutate_op->mutate(c2);
 			/*std::shuffle(c1->gene.begin(), c1->gene.end(), gen);
 			std::shuffle(c2->gene.begin(), c2->gene.end(), gen);*/
 
-			//ret.emplace_back(mutated_c1);
-			//ret.emplace_back(mutated_c2);
+			ret.emplace_back(mutated_c1);
+			ret.emplace_back(mutated_c2);
 
-			ret.emplace_back(c1);
-			ret.emplace_back(c2);
+			/*ret.emplace_back(c1);
+			ret.emplace_back(c2);*/
 		
 		}
 		else
@@ -293,9 +293,10 @@ void SMMFEA::compute_so_rank(PopType & pop)
 }
 void SMMFEA::compute_rank(PopType & pop)
 {
+	
+	compute_so_rank(pop);
 	compute_mo_rank(pop);
 
-	compute_so_rank(pop);
 	/*for (auto& idv : pop)
 	{
 		std::cout << idv->so_task.rank << "\n";
@@ -410,8 +411,8 @@ void SMMFEA::run(DistMatType& dist_mat, IOHandler& io_handler)
 
 		std::cout << "generation " << gen_count << "\n";
 
-		auto idv1 = cur_pop[1];
-		auto idv2 = cur_pop[0];
+		auto idv1 = cur_pop[0];
+		auto idv2 = cur_pop[1];
 
 		std::cout	<< "so: "			<< std::setw(7)		<< idv1->so_task.val << "\t" 
 					<< "mo: "			<< std::setw(10)	<< idv1->mo_task.val_pack[0] << " " << idv1->mo_task.val_pack[1] << "\t" 

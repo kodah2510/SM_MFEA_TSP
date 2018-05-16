@@ -19,8 +19,8 @@ class MathTextSciFormatter(mticker.Formatter):
         else:
             s =  r'%s%s' % (significand, exponent)
         return "${}$".format(s)
-def plot_front(file):
-    fig = plt.figure()
+def plot_front(file, pn, an):
+    fig = plt.figure(num=pn)
     ax = fig.add_subplot(111)
 
     X = [];
@@ -56,11 +56,13 @@ def plot_front(file):
     ax.xaxis.set_major_formatter(mf)
     ax.margins(0)
     #fig.tight_layout()
+    plt.savefig(fname='img\\'+an+'_'+pn+'_front.png')
     plt.show()
     pass
 
-def plot_graph(f_smmfea, f_soea, f_moea):
-    fig = plt.figure()
+def plot_graph(f_smmfea, f_soea, f_moea, pn):
+    fig = plt.figure(num=pn)
+    
     ax = fig.add_subplot(111)
 
     y_smmfea    = []
@@ -111,8 +113,9 @@ def plot_graph(f_smmfea, f_soea, f_moea):
     #         horizontalalignment='left',
     #         verticalalignment='bottom')
     #ax.yaxis.set_major_formatter(MathTextSciFormatter())
-
-    plt.legend()
+ 
+    ax.legend()
+    plt.savefig('img\\'+pn+'_dv.png')
     plt.show()
     pass
 def main():
@@ -136,12 +139,12 @@ def main():
         dv_smmfea   = open(an[0] + '\\' + an[0] + '_' + pn + '_dv.txt', 'r')
         dv_soea     = open(an[1] + '\\' + an[1] + '_' + pn + '_dv.txt', 'r')
         dv_moea     = open(an[2] + '\\' + an[2] + '_' + pn + '_dv.txt', 'r')
-        plot_graph(dv_smmfea, dv_soea, dv_moea)
+        plot_graph(dv_smmfea, dv_soea, dv_moea, pn)
 
         front_smmfea = open(an[0] + '\\' + an[0] + '_' + pn + '_front.txt', 'r')
         front_moea   = open(an[2] + '\\' + an[2] + '_' + pn + '_front.txt', 'r')
-        plot_front(front_smmfea)
-        plot_front(front_moea)
+        plot_front(front_smmfea, pn, 'smmfea')
+        plot_front(front_moea, pn, 'moea')
         pass
     pass
    
