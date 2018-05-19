@@ -14,7 +14,7 @@ public:
 	const double mutation_rate = 0.2;
 
 	void init(size_t& pop_sz, size_t& gene_sz, GeneType& base_pert);
-	void run(DistMatType& dist_mat, IOHandler& io_handler);
+	void run(DistMatType& dist_mat, IOHandler& io_handler, int times);
 private:
 	int a, b; // two cities
 

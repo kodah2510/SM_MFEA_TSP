@@ -23,7 +23,7 @@ public:
 	void set_localsearch_operator(LocalSearchOperator* m_ls_op); 
 	
 	virtual void init(size_t& POP_SZ, size_t& gene_sz, GeneType& base_pert)	= 0;
-	virtual void run(DistMatType& dist_mat, IOHandler& io_handler)	= 0;
+	virtual void run(DistMatType& dist_mat, IOHandler& io_handler, int times)	= 0;
 	
 protected:
 	CrossoverOperator*		cross_op;

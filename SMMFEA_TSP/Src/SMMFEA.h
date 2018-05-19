@@ -25,7 +25,7 @@ public:
 	const double mutation_rate = 0.2;
 
 	void init(size_t& POP_SZ, size_t& gene_sz, GeneType& base_pert);
-	void run(DistMatType& dist_mat, IOHandler& io_handler);
+	void run(DistMatType& dist_mat, IOHandler& io_handler, int times);
 
 	void set_crossover_operator(CrossoverOperator* co);
 	void set_mutate_operator(MutationOperator* mo);

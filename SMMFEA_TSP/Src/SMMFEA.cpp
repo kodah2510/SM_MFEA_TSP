@@ -338,15 +338,15 @@ void SMMFEA::select(PopType & inter_pop, PopType & cur_pop)
 	cur_pop.insert(cur_pop.begin(), inter_pop.begin(), inter_pop.begin() + sz);
 }
 
-void SMMFEA::run(DistMatType& dist_mat, IOHandler& io_handler)
+void SMMFEA::run(DistMatType& dist_mat, IOHandler& io_handler, int times)
 {
 	//output file setup
 	auto problem_name = io_handler.get_problem_name();
 	std::ofstream of_dv;
-	of_dv.open(".\\Result\\SMMFEA\\" + name + "_" + problem_name + "_dv.txt");
+	of_dv.open(".\\Result\\SMMFEA\\" + name + "_" + problem_name + "_dv_"+std::to_string(times)+".txt");
 
 	std::ofstream of_front;
-	of_front.open(".\\Result\\SMMFEA\\" + name + "_" + problem_name + "_front.txt");
+	of_front.open(".\\Result\\SMMFEA\\" + name + "_" + problem_name + "_front_"+std::to_string(times)+".txt");
 
 	//evaluating
 	std::cout << "Evaluating...!\n";
@@ -429,7 +429,15 @@ void SMMFEA::run(DistMatType& dist_mat, IOHandler& io_handler)
 		gen_count++;
 
 		//record the dist_val and f1 f2 of the first front
-		of_dv << idv2->so_task.val << "\n";
+		for (auto& idv : cur_pop)
+		{
+			if (idv->skill_factor == SKILL_FACTOR::SO)
+			{
+				of_dv << idv->so_task.val << "\n";
+				break;
+			}
+		}
+		//of_dv << idv2->so_task.val << "\n";
 		/*if (idv2->skill_factor == SKILL_FACTOR::SO)
 		{
 			

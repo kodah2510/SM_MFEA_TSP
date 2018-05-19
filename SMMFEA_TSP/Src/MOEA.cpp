@@ -41,41 +41,49 @@ auto MOEA::gen_op(PopType & pop, size_t max_size)
 {
 	std::uniform_real_distribution<> dis(0.0, 1.0);
 	std::mt19937 gen;
-
+	auto r = dis(gen);
 	PopType ret;
 	ret.reserve(max_size);
+
 	while (ret.size() < max_size)
 	{
 		int p1_idx = Ultility::get_rand_int(0, pop.size() - 1);
 		int p2_idx = Ultility::get_rand_int(0, pop.size() - 1);
-
+		//crossover
 		auto os_pack = cross_op->crossover(pop[p1_idx], pop[p2_idx]);
 		IdvSPtr c1{ os_pack[0] };
 		IdvSPtr c2{ os_pack[1] };
 
-		ret.emplace_back(std::move(c1));
-		ret.emplace_back(std::move(c2));
-	}
-	for (auto& idv : ret)
-	{
-		if (dis(gen) <= mutation_rate)
+		auto r = dis(gen);
+		if (r < mutation_rate)
 		{
-			mutate_op->mutate(idv);
+			auto mutate_c1 = mutate_op->mutate(c1);
+			ret.emplace_back(mutate_c1);
+			ret.emplace_back(c2);
+			continue;
 		}
+		r = dis(gen);
+		if (r < mutation_rate)
+		{
+			auto mutate_c2 = mutate_op->mutate(c2);
+			ret.emplace_back(mutate_c2);
+			ret.emplace_back(c1);
+			continue;
+		}
+		ret.emplace_back(c1);
+		ret.emplace_back(c2);
 	}
-
 	return ret;
 }
 
-void MOEA::run(DistMatType & dist_mat, IOHandler & io_handler)
+void MOEA::run(DistMatType & dist_mat, IOHandler & io_handler, int times)
 {
 	auto problem_name = io_handler.get_problem_name();
-	std::ofstream	of_dv;
-	of_dv.open(".\\Result\\MOEA\\" + algorithm_name + "_" + problem_name + "_dv.txt");
+	std::ofstream of_dv;
+	of_dv.open(	".\\Result\\MOEA\\" + algorithm_name + "_" + problem_name + "_dv_" + std::to_string(times) + ".txt");
 
-	std::ofstream	of_front;
-	of_front.open(".\\Result\\MOEA\\" + algorithm_name + "_" + problem_name + "_front.txt");
-
+	std::ofstream of_front;
+	of_front.open(	".\\Result\\MOEA\\" + algorithm_name + "_" + problem_name + "_front_" +std::to_string(times) +".txt");
 
 	Evaluator evaluator;
 	evaluator.eval(cur_pop, dist_mat, gene_sz, a, b);

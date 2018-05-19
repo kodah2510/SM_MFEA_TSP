@@ -72,11 +72,11 @@ auto SOEA::gen_op(PopType& pop, size_t max_size)
 	}
 	return ret;
 }
-void SOEA::run(DistMatType& dist_mat, IOHandler& io_handler)
+void SOEA::run(DistMatType& dist_mat, IOHandler& io_handler, int times)
 {
 	auto problem_name = io_handler.get_problem_name();
 	std::ofstream of_dv;
-	of_dv.open(".\\Result\\SOEA\\" + algorithm_name + "_" + problem_name + "_dv.txt");
+	of_dv.open(".\\Result\\SOEA\\" + algorithm_name + "_" + problem_name + "_dv_"+std::to_string(times)+".txt");
 
 	std::cout << "evaluating current pop...\n";
 	Evaluator evaluator;

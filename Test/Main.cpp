@@ -53,7 +53,7 @@ int main()
 {
 	std::vector<std::string> input_files = 
 	{
-		"bier127.tsp",
+		/*"bier127.tsp",
 		"ch130.tsp",
 		"eil51.tsp",
 		"kroA150.tsp",
@@ -62,8 +62,9 @@ int main()
 		"kroB200.tsp",
 		"lin105.tsp",
 		"pr76.tsp",
-		"pr107.tsp",
-		"pr136.tsp",
+		"pr107.tsp",*/
+		"pr124.tsp"
+		/*"pr136.tsp",
 		"pr144.tsp",
 		"pr152.tsp",
 		"pr226.tsp",
@@ -71,7 +72,7 @@ int main()
 		"pr299.tsp",
 		"rat195.tsp",
 		"ts225.tsp",
-		"u159.tsp"
+		"u159.tsp"*/
 	};
 	for (auto& name : input_files)
 	{

@@ -58,6 +58,7 @@ def plot_front(file, pn, an):
     #fig.tight_layout()
     plt.savefig(fname='img\\'+an+'_'+pn+'_front.png')
     plt.show()
+    plt.close(fig)
     pass
 
 def plot_graph(f_smmfea, f_soea, f_moea, pn):
@@ -117,6 +118,7 @@ def plot_graph(f_smmfea, f_soea, f_moea, pn):
     ax.legend()
     plt.savefig('img\\'+pn+'_dv.png')
     plt.show()
+    plt.close(fig)
     pass
 def main():
     # X = np.linspace(-np.pi, np.pi, 256, endpoint=True)
@@ -131,24 +133,27 @@ def main():
     problem_name    =   ["eil51",    "bier127",  "ch130","kroA150",
                         "kroA200",  "kroB150",  "kroB200","lin105",
                         "pr76",     "pr107",    "pr136","pr144","pr152",
-                        "pr226",    "pr264", "pr299","rat195"]
+                        "pr226",    "pr264", "pr299","rat195", "ts225", "u159"]
     #"pr264","pr299","rat195"
     #convergence trend
-   
+  
     for pn in problem_name:
-        dv_smmfea   = open(an[0] + '\\' + an[0] + '_' + pn + '_dv.txt', 'r')
-        dv_soea     = open(an[1] + '\\' + an[1] + '_' + pn + '_dv.txt', 'r')
-        dv_moea     = open(an[2] + '\\' + an[2] + '_' + pn + '_dv.txt', 'r')
+        dv_smmfea   = open(an[0] + '_' + pn + '_dv.txt', 'r')
+        dv_soea     = open(an[1] + '_' + pn + '_dv.txt', 'r')
+        dv_moea     = open(an[2] + '_' + pn + '_dv.txt', 'r')
         plot_graph(dv_smmfea, dv_soea, dv_moea, pn)
 
-        front_smmfea = open(an[0] + '\\' + an[0] + '_' + pn + '_front.txt', 'r')
-        front_moea   = open(an[2] + '\\' + an[2] + '_' + pn + '_front.txt', 'r')
-        plot_front(front_smmfea, pn, 'smmfea')
-        plot_front(front_moea, pn, 'moea')
+      
         pass
     pass
-   
-
+    for i in range(1, 6):
+        for pn in problem_name:
+            front_smmfea = open(an[0] + '\\' + an[0] + '_' + pn + '_front_'+ str(i) +'.txt', 'r')
+            front_moea   = open(an[2] + '\\' + an[2] + '_' + pn + '_front_'+ str(i) +'.txt', 'r')
+            plot_front(front_smmfea, pn, 'smmfea')
+            plot_front(front_moea, pn, 'moea')
+        pass
+    pass
 
 if __name__ == '__main__':
     main()
