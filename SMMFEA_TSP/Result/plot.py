@@ -19,8 +19,8 @@ class MathTextSciFormatter(mticker.Formatter):
         else:
             s =  r'%s%s' % (significand, exponent)
         return "${}$".format(s)
-def plot_front(file, pn, an):
-    fig = plt.figure(num=pn)
+def plot_front(file, pn, an, i):
+    fig = plt.figure(num=pn+'_'+an)
     ax = fig.add_subplot(111)
 
     X = [];
@@ -56,8 +56,8 @@ def plot_front(file, pn, an):
     ax.xaxis.set_major_formatter(mf)
     ax.margins(0)
     #fig.tight_layout()
-    plt.savefig(fname='img\\'+an+'_'+pn+'_front.png')
-    plt.show()
+    plt.savefig(fname='img\\'+an+'_'+pn+'_front_'+str(i)+'.png')
+    #plt.show()
     plt.close(fig)
     pass
 
@@ -117,7 +117,7 @@ def plot_graph(f_smmfea, f_soea, f_moea, pn):
  
     ax.legend()
     plt.savefig('img\\'+pn+'_dv.png')
-    plt.show()
+    #plt.show()
     plt.close(fig)
     pass
 def main():
@@ -150,10 +150,11 @@ def main():
         for pn in problem_name:
             front_smmfea = open(an[0] + '\\' + an[0] + '_' + pn + '_front_'+ str(i) +'.txt', 'r')
             front_moea   = open(an[2] + '\\' + an[2] + '_' + pn + '_front_'+ str(i) +'.txt', 'r')
-            plot_front(front_smmfea, pn, 'smmfea')
-            plot_front(front_moea, pn, 'moea')
+            plot_front(front_smmfea, pn, 'smmfea', i)
+            plot_front(front_moea, pn, 'moea', i)
         pass
     pass
+    
 
 if __name__ == '__main__':
     main()

@@ -6,7 +6,7 @@
 struct Node
 {
 	size_t name;
-	size_t x, y;
+	double x, y;
 };
 auto dist(Node& a, Node& b)
 {
@@ -63,7 +63,7 @@ int main()
 		"lin105.tsp",
 		"pr76.tsp",
 		"pr107.tsp",*/
-		"pr124.tsp"
+		//"pr124.tsp"
 		/*"pr136.tsp",
 		"pr144.tsp",
 		"pr152.tsp",
@@ -71,8 +71,8 @@ int main()
 		"pr264.tsp",
 		"pr299.tsp",
 		"rat195.tsp",
-		"ts225.tsp",
-		"u159.tsp"*/
+		"ts225.tsp",*/
+		"u159.tsp"
 	};
 	for (auto& name : input_files)
 	{
