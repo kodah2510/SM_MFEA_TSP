@@ -52,6 +52,11 @@ auto SMMFEA::gen_op(PopType & pop, const double & rmp, const double & mutation_r
 		auto r = dis(gen);
 		auto p1 = pop[p1_idx];
 		auto p2 = pop[p2_idx];
+		if (p1->so_task.val == p2->so_task.val)
+		{
+			if (dis(gen) < 0.5) p1 = pop[0];
+			else p2 = pop[0];
+		}
 		if (r < rmp || p1->skill_factor == p2->skill_factor)
 		{
 			//crossover + mutate
@@ -120,6 +125,35 @@ bool SMMFEA::is_dominate(IdvSPtr & a, IdvSPtr & b)
 		}
 	}
 	return state;
+}
+void SMMFEA::niche_enforcement(std::vector<size_t>& front, PopType& pop)
+{
+	std::vector<size_t> delete_idx;
+
+	auto front_sz = front.size();
+	delete_idx.reserve(front_sz);
+	for (size_t i = 0; i < front_sz - 1; i++)
+	{
+		for (size_t j = i + 1; j < front_sz; j++)
+		{
+			if (pop[i]->so_task.val == pop[j]->so_task.val)
+			{
+				std::random_device rd;
+				std::uniform_real_distribution<> dist(0.0, 1.0);
+				auto r = dist(rd);
+				if (r < 0.5) delete_idx.emplace_back(i);
+				else delete_idx.emplace_back(j);
+			}
+		}
+	}
+	if (delete_idx.size() != 0)
+	{
+		std::sort(delete_idx.rbegin(), delete_idx.rend());
+		for (auto& idx : delete_idx)
+		{
+			front.erase(front.begin() + idx);
+		}
+	}
 }
 void SMMFEA::crowding_distance(std::vector<size_t>& front, PopType & pop)
 {
@@ -240,6 +274,7 @@ void SMMFEA::compute_mo_rank(PopType & pop)
 	{
 		if (f.size() != 0)
 		{
+			//niche_enforcement(f, pop);
 			crowding_distance(f, pop);
 			//std::cout << "out cd \n";
 			/*for (auto& idx : f)
@@ -365,6 +400,10 @@ void SMMFEA::run(DistMatType& dist_mat, IOHandler& io_handler, int times)
 					<< "rank so: "			   << idv->so_task.rank << "\t mo " << idv->mo_task.rank << "\t"
 					<< "scalar fitness: "      << idv->scalar_fitness << "\n";
 	}*/
+	std::sort(cur_pop.begin(), cur_pop.end(), [](IdvSPtr& a, IdvSPtr& b)
+	{
+		return a->scalar_fitness > b->scalar_fitness;
+	});
 
 	while (gen_count < number_of_gens)
 	{
@@ -372,7 +411,7 @@ void SMMFEA::run(DistMatType& dist_mat, IOHandler& io_handler, int times)
 		PopType offspring = gen_op(cur_pop, rmp, mutation_rate, pop_sz / 2);
 
 		//refinement
-		//ls_op->run(offspring, dist_mat, gene_sz);
+		ls_op->run(offspring, dist_mat, gene_sz);
 
 		//evaluate offspring
 		evaluator.eval(offspring, dist_mat, gene_sz, a, b);

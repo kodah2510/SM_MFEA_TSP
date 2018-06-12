@@ -88,7 +88,7 @@ void SOEA::run(DistMatType& dist_mat, IOHandler& io_handler, int times)
 		//generating
 		PopType offspring = gen_op(cur_pop, pop_sz / 2);
 		//refinement
-		//ls_op->run(offspring, dist_mat, gene_sz);
+		ls_op->run(offspring, dist_mat, gene_sz);
 		//eval
 		evaluator.eval(offspring, dist_mat, gene_sz);
 

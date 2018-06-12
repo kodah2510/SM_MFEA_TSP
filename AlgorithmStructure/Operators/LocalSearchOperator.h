@@ -21,24 +21,29 @@ public:
 	{
 		for (auto& idv : os)
 		{
-			size_t counter = 0;
+			//std::cout << idv << "\n";
+			size_t improve = 0;
 			auto best_dist = cal_dist(idv->gene, dist_mat, gene_sz);
-			for (size_t i = 1; i < gene_sz - 1; i++)
+			while (improve < 50)
 			{
-				for (size_t k = i + 1; k < gene_sz; k++)
+				for (size_t i = 1; i < gene_sz - 1; i++)
 				{
-					auto new_route = opt_swap(idv->gene, i, k);
-					auto new_dist = cal_dist(new_route, dist_mat, gene_sz);
-					if (counter == 50) break;
-
-					if (new_dist < best_dist)
+					for (size_t k = i + 1; k < gene_sz; k++)
 					{
-						counter++;
-						idv->gene = new_route;
-						best_dist = new_dist;
+						auto new_route = opt_swap(idv->gene, i, k);
+						auto new_dist = cal_dist(new_route, dist_mat, gene_sz);
+						if (improve == 50) break;
+
+						if (new_dist < best_dist)
+						{
+							//std::cout << "improved!\n";
+							improve = 0;
+							idv->gene = new_route;
+							best_dist = new_dist;
+						}
 					}
 				}
-
+				improve++;
 			}
 		}
 	}

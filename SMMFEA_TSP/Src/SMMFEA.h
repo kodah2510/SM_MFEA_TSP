@@ -48,5 +48,7 @@ private:
 	auto fast_non_dominated_sort(PopType& pop);
 	void crowding_distance(std::vector<size_t>& front, PopType& pop);
 	bool is_dominate(IdvSPtr& a, IdvSPtr& b);
+	//additional improve
+	void niche_enforcement(std::vector<size_t>& front, PopType& pop);
 
 };

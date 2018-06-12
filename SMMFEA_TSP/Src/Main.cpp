@@ -33,39 +33,44 @@ int main(int argv, char** args)
 	size_t gene_sz = 0;
 	const std::string folder_name = "Input\\";
 	std::vector<std::string> input_files = {
-		"eil51.txt",
+		/*"eil51.txt",
 		"bier127.txt",
 		"ch130.txt",
-		"kroA150.txt",
-		"kroA200.txt",
+		"kroA150.txt",*/
+
+		/*"kroA200.txt",
 		"kroB150.txt",
 		"kroB200.txt",
-		"lin105.txt",
-		"pr76.txt",
+		"lin105.txt",*/
+
+		/*"pr76.txt",
 		"pr107.txt",
 		"pr136.txt",
-		"pr144.txt",
-		"pr152.txt",
+		"pr144.txt",*/
+
+		/*"pr152.txt",
 		"pr226.txt",
 		"pr264.txt",
-		"pr299.txt",
-		"rat195.txt",
+		"pr299.txt",*/
+
+		//"rat195.txt",
 		"ts225.txt",
 		"u159.txt"
 	};
-	for (int time = 1; time < 6; time++)
+	
+	for (auto& input_file : input_files)
 	{
-		for (auto& input_file : input_files)
+		IOHandler io_handler;
+		dist_mat = io_handler.read_mat(folder_name + input_file, gene_sz);
+		//done with the input
+
+		// Individual initializing
+		size_t pop_sz = 100;
+		std::vector<int> base_pert(gene_sz);
+		std::iota(base_pert.begin(), base_pert.end(), 0);
+
+		for (auto time = 1; time <= 20; time++)
 		{
-			IOHandler io_handler;
-			dist_mat = io_handler.read_mat(folder_name + input_file, gene_sz);
-			//done with the input
-
-			// Individual initializing
-			size_t pop_sz = 100;
-			std::vector<int> base_pert(gene_sz);
-			std::iota(base_pert.begin(), base_pert.end(), 0);
-
 			std::cout << "SMMFEA\n";
 			SMMFEA smmfea;
 			smmfea.set_crossover_operator(new OrderCrossoverOperator());
@@ -75,7 +80,7 @@ int main(int argv, char** args)
 			smmfea.init(pop_sz, gene_sz, base_pert);
 			smmfea.run(dist_mat, io_handler, time);
 
-			/*std::cout << "SOEA\n";
+			std::cout << "SOEA\n";
 			SOEA soea;
 			soea.set_crossover_operator(new OrderCrossoverOperator());
 			soea.set_mutate_operator(new TworsMutationOperator());
@@ -91,8 +96,7 @@ int main(int argv, char** args)
 			moea.set_localsearch_operator(new LS2optOperator());
 
 			moea.init(pop_sz, gene_sz, base_pert);
-			moea.run(dist_mat, io_handler, time);*/
-
+			moea.run(dist_mat, io_handler, time);
 		}
 	}
 	

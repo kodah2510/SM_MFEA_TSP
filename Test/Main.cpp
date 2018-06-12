@@ -5,7 +5,7 @@
 #include <regex>
 struct Node
 {
-	size_t name;
+	double name;
 	double x, y;
 };
 auto dist(Node& a, Node& b)
@@ -62,16 +62,16 @@ int main()
 		"kroB200.tsp",
 		"lin105.tsp",
 		"pr76.tsp",
-		"pr107.tsp",*/
-		//"pr124.tsp"
-		/*"pr136.tsp",
+		"pr107.tsp",
+		"pr124.tsp"
+		"pr136.tsp",
 		"pr144.tsp",
 		"pr152.tsp",
 		"pr226.tsp",
 		"pr264.tsp",
 		"pr299.tsp",
-		"rat195.tsp",
-		"ts225.tsp",*/
+		"rat195.tsp",*/
+		"ts225.tsp",
 		"u159.tsp"
 	};
 	for (auto& name : input_files)
@@ -102,7 +102,7 @@ int main()
 			{
 				//std::cout << line << "\n";
 				std::regex ws_re("\\s+");
-				std::vector<size_t> values_pack;
+				std::vector<double> values_pack;
 				values_pack.reserve(3);
 				std::for_each(
 					std::sregex_token_iterator(line.begin(), line.end(), ws_re, -1),
@@ -110,7 +110,7 @@ int main()
 					[&values_pack](const std::string& token)
 				{
 					if (token.compare("") != 0)
-						values_pack.emplace_back(std::stoi(token, nullptr));
+						values_pack.emplace_back(std::stod(token, nullptr));
 				}
 				);
 				Node n;
